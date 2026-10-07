@@ -1,0 +1,10 @@
+.TH MINI-COMMANDER 1 "" "" "User Commands"
+.SH NAME
+mini\-commander \- simple two-panel file manager
+.SH SYNOPSIS
+.B mini-commander
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+Very simplified Midnight Commander clone with built-in viewer (F3) and editor (F4).
+.SH AUTHOR
+Tomas M. Packaged by Vítězslav Dvořák.

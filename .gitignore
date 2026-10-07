@@ -4,3 +4,9 @@ TAGS
 /static/mc.map
 /static/mc.symbols
 /static/mc.sections
+/debian/.debhelper/
+/debian/mini-commander/
+/debian/mini-commander.1
+/debian/*.substvars
+/debian/debhelper-build-stamp
+/debian/files

@@ -1,0 +1,19 @@
+Source: mini-commander
+Section: utils
+Priority: optional
+Maintainer: Vítězslav Dvořák <info@vitexsoftware.cz>
+Build-Depends: debhelper-compat (= 13), libncurses-dev, help2man, appstream
+Standards-Version: 4.6.2
+Homepage: https://github.com/Tomas-M/mini-commander
+Rules-Requires-Root: no
+
+Package: mini-commander
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: very simplified Midnight Commander clone with viewer and editor
+ Mini Commander is a small two-panel file manager for the Linux terminal.
+ It includes a built-in file viewer and a text editor with syntax
+ highlighting, block operations and UTF-8 support.
+ .
+ The binary is installed as mini-commander to avoid a conflict with
+ Midnight Commander's mc.

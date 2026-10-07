@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	$(MAKE) CFLAGS="-std=gnu99 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -O2 -g $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -lncursesw"
+	help2man --no-discard-stderr --no-info --name="simple two-panel file manager" \
+	    --version-string="$(shell dpkg-parsechangelog -S Version)" ./mc -o debian/mini-commander.1 || \
+	    cp debian/mini-commander.1.in debian/mini-commander.1
+
+override_dh_auto_install:
+	install -D -m 0755 mc debian/mini-commander/usr/bin/mini-commander
+
+override_dh_auto_clean:
+	$(MAKE) clean
+	rm -f debian/mini-commander.1
+
+override_dh_auto_test:
+	appstreamcli validate --pedantic --no-net debian/mini-commander.metainfo.xml

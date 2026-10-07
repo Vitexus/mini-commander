@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>cz.vitexsoftware.mini-commander</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>Mini Commander</name>
+  <summary>Simple two-panel file manager with viewer and editor</summary>
+  <description>
+    <p>Mini Commander is a very simplified clone of Midnight Commander for the Linux terminal. It includes a built-in file viewer and a text editor with syntax highlighting, block operations and UTF-8 support.</p>
+  </description>
+  <icon type="stock">utilities-terminal</icon>
+  <url type="homepage">https://github.com/Tomas-M/mini-commander</url>
+  <provides>
+    <binary>mini-commander</binary>
+  </provides>
+</component>

@@ -8,7 +8,7 @@
   <description>
     <p>Mini Commander is a very simplified clone of Midnight Commander for the Linux terminal. It includes a built-in file viewer and a text editor with syntax highlighting, block operations and UTF-8 support.</p>
   </description>
-  <icon type="stock">utilities-terminal</icon>
+  <icon type="stock">mini-commander</icon>
   <url type="homepage">https://github.com/Tomas-M/mini-commander</url>
   <provides>
     <binary>mini-commander</binary>

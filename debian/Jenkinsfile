@@ -359,37 +359,42 @@ architectures.each { arch ->
                         }
                         stage('Archive artifacts ' + distroName + suffix) {
                             // archiveArtifacts can only reach files under $WORKSPACE,
-                            // so stage them into a per-build subdirectory there. The
-                            // subdirectory name carries job, build, distro, node and
-                            // executor, so two nodes sharing this one NFS workspace
-                            // cannot collide on it.
-                            def stageDir = 'dist/' + buildId
-                            withEnv(["LB_OUT=${t.out}", "LB_STAGE=${stageDir}"]) {
-                                sh '''
-                                    set -eu
-                                    : "${WORKSPACE:?WORKSPACE unset}"
-                                    mkdir -p "$WORKSPACE/$LB_STAGE"
-                                    find "$WORKSPACE/$LB_STAGE" -mindepth 1 -delete 2>/dev/null || true
-                                    cp -a "$LB_OUT"/. "$WORKSPACE/$LB_STAGE"/
-                                '''
+                            // so copy the produced files from the node-local dist
+                            // directory into $WORKSPACE/dist. They are archived flat
+                            // (dist/<file>) so the job page lists every finished
+                            // package at a glance. File names already carry the
+                            // distro and architecture (..._1.0.0.4~trixie_arm64.deb),
+                            // so parallel branches sharing this workspace cannot
+                            // collide, and each branch only ever touches its own files.
+                            def stageDir = 'dist'
+                            def files = artifacts.findAll { it?.trim() }.collect { it.tokenize('/')[-1] }
+                            files.each { f ->
+                                if (!(f ==~ /^[A-Za-z0-9][A-Za-z0-9._+~-]*$/)) { error("Invalid artifact name: ${f}") }
+                                withEnv(["LB_OUT=${t.out}", "LB_STAGE=${stageDir}", "LB_FILE=${f}"]) {
+                                    sh '''
+                                        set -eu
+                                        : "${WORKSPACE:?WORKSPACE unset}"
+                                        mkdir -p "$WORKSPACE/$LB_STAGE"
+                                        cp -f -- "$LB_OUT/$LB_FILE" "$WORKSPACE/$LB_STAGE/$LB_FILE"
+                                    '''
+                                }
+                                println "Archiving artifact: " + f
+                                archiveArtifacts artifacts: stageDir + '/' + f
                             }
-                            artifacts.each { deb_file ->
-                                println "Archiving artifact: " + deb_file
-                                archiveArtifacts artifacts: stageDir + '/' + deb_file
+                            // NFS-safe cleanup: remove only this branch's own files as
+                            // the jenkins uid (root_squash on the workspace export makes
+                            // `sudo rm` a no-op there). rmdir succeeds only for the last
+                            // branch out, which is harmless.
+                            files.each { f ->
+                                withEnv(["LB_STAGE=${stageDir}", "LB_FILE=${f}"]) {
+                                    sh '''
+                                        set -u
+                                        : "${WORKSPACE:?WORKSPACE unset}"
+                                        rm -f -- "$WORKSPACE/$LB_STAGE/$LB_FILE" 2>/dev/null || true
+                                    '''
+                                }
                             }
-                            // NFS-safe cleanup of the staging directory: plain
-                            // find/delete as the jenkins uid, because root_squash on
-                            // the workspace export makes `sudo rm` a no-op there.
-                            withEnv(["LB_STAGE=${stageDir}"]) {
-                                sh '''
-                                    set -u
-                                    : "${WORKSPACE:?WORKSPACE unset}"
-                                    if [ -d "$WORKSPACE/$LB_STAGE" ]; then
-                                        find "$WORKSPACE/$LB_STAGE" -mindepth 1 -delete 2>/dev/null || true
-                                        rmdir -- "$WORKSPACE/$LB_STAGE" 2>/dev/null || true
-                                    fi
-                                '''
-                            }
+                            sh 'rmdir -- "$WORKSPACE/dist" 2>/dev/null || true'
                         }
                     } finally {
                         stage('Cleanup ' + distroName + suffix) {
